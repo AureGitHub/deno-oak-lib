@@ -2,7 +2,7 @@ import { Application, isHttpError, logger, Status, send, oakCors } from "./deps.
 import authController from "./controller.ts";
 import { Router } from "./deps.ts";
 
-export const run = (appRouter : Router) => {
+export const run = (appRouter : Router) => { 
 
   const ROOT_DIR = "./ionic";
   const ROOT_DIR_PATH = "/ionic";
