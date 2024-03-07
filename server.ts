@@ -1,5 +1,5 @@
 import { Application, isHttpError, logger, Status, send, oakCors } from "./deps.ts";
-import authController from "./controller.ts";
+import {secureTokenController} from "./controller.ts";
 import { Router } from "./deps.ts";
 
 export const run = (appRouter : Router) => { 
@@ -52,7 +52,7 @@ export const run = (appRouter : Router) => {
   });
 
   // este middel comprueba que el token sea correcto y lo refresca
-  app.use(authController.secureTokenController);
+  app.use(secureTokenController);
 
 
   app.use(async (ctx, next) => {
