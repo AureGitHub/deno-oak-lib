@@ -5,3 +5,4 @@ export * from "./sendEmail.ts"
 
 export * from "./aureDB.ts"
 export * from "./controller.ts"
+export * from "./require.ts"
