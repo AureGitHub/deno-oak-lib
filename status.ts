@@ -1,4 +1,4 @@
-import { StatusCodes } from "../dep/deps.ts";
+import { StatusCodes } from "./deps.ts";
 
 // deno-lint-ignore no-explicit-any
 export const statusOK = (ctx: any, data : any)=>{

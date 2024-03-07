@@ -1,6 +1,6 @@
-import { Application, isHttpError, logger, Status, send, oakCors } from "./dep/deps.ts";
-import authController from "./AUTH/controller.ts";
-import { Router } from "./dep/deps.ts";
+import { Application, isHttpError, logger, Status, send, oakCors } from "./deps.ts";
+import authController from "./controller.ts";
+import { Router } from "./deps.ts";
 
 export const run = (appRouter : Router) => {
 

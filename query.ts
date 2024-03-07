@@ -1,4 +1,4 @@
-import { StatusCodes } from "../dep/deps.ts";
+import { StatusCodes } from "./deps.ts";
 
 export const getFilter = (colums : any[]) =>{
     let cadena =  `WHERE 1=1 `;

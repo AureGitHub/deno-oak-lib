@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 
-import { StatusCodes } from "../dep/deps.ts";
+import { StatusCodes } from "./deps.ts";
 
 
 
@@ -9,7 +9,7 @@ export class aureDB {
   private entities : any;
   private client : any;
   
-  constructor(client: any, entities : any, table: string) {
+  constructor(client: any, entities : any, table: string) {  
     this.table = table;
     this.entities = entities;
     this.client = client;

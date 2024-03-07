@@ -1,4 +1,4 @@
-import { RouterContext, create,  decode, StatusCodes } from "../dep/deps.ts";
+import { RouterContext, create,  decode, StatusCodes } from "./deps.ts";
 
 import "https://deno.land/x/dotenv@v3.2.2/load.ts";
 
