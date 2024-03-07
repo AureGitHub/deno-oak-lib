@@ -1,0 +1,34 @@
+(Para crear schema. Necesita url postgress)
+deno run -A npm:prisma@^4.5 db push    
+
+Hay que generar el proxy cada vez que se cambia el schema
+deno run -A  --unstable npm:prisma@^4.5 generate --data-proxy
+
+
+(Para lanzar seed. Necesita url prisma)
+deno run -A prisma/seed/seed.js  
+
+
+deno run --unstable --watch  -A server.ts
+
+https://clients.cloudclusters.io/applications/5df28b734cdb444da2aa3b570f6d9004/dbuser
+
+
+Crear proxy (login with github)
+https://cloud.prisma.io/projects
+
+Crear proxy primsa (NUEVO)
+https://console.prisma.io/closbs6am01twmv0fuiy0g5vd/clq2a1kml0760yc0u04ubpzlm/accelerate/setup
+
+
+
+version actual deno:  v12.22.12
+
+deno run  --allow-all --allow-env server.ts
+
+  "runtimeExecutable": "C:\\Users\\Aure-remoto\\.deno\\bin\\deno.EXE",
+            "runtimeArgs": [
+                "run",
+                "--inspect-wait",
+                "--allow-all",
+                "--allow-env",
