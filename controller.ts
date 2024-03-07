@@ -5,7 +5,7 @@ import "https://deno.land/x/dotenv@v3.2.2/load.ts";
 
 
 
-const secureTokenController =  async (ctx: any, next: any) =>  {
+export const secureTokenController =  async (ctx: any, next: any) =>  {
 
 
   if (!ctx.state.token){
@@ -58,7 +58,7 @@ const secureTokenController =  async (ctx: any, next: any) =>  {
 };
 
 
-const giveMeToken = async(user: any) => {
+export const giveMeToken = async(user: any) => {
 
   const key = await crypto.subtle.generateKey(
     { name: "HMAC", hash: "SHA-512" },
@@ -97,7 +97,7 @@ const giveMeToken = async(user: any) => {
 
 
 
-const loginUserController = async ({
+export const loginUserController = async ({
   request,
   response,
 }: RouterContext<string>) => {
@@ -167,7 +167,7 @@ const loginUserController = async ({
 
 
 
-const logoutController = (ctx: any) => {
+export const logoutController = (ctx: any) => {
  
   ctx.state.secure = null;
   ctx.state.token = null;
@@ -177,10 +177,10 @@ const logoutController = (ctx: any) => {
 };
 
 
-export default {
-  loginUserController,
-  logoutController,
-  secureTokenController,
-  giveMeToken
+// export default {
+//   loginUserController,
+//   logoutController,
+//   secureTokenController,
+//   giveMeToken
   
-};
+// };
