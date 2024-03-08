@@ -1,6 +1,6 @@
 import { Context, StatusCodes  } from "./deps.ts";
 
-const requireUser = async (ctx: Context, next: () => Promise<unknown>) => {
+export const requireUser = async (ctx: Context, next: () => Promise<unknown>) => {
 
   if (!ctx.state.token){
     ctx.response.body = {
@@ -14,7 +14,7 @@ const requireUser = async (ctx: Context, next: () => Promise<unknown>) => {
 
 };
 
-const requireAdmin = async (ctx: Context, next: () => Promise<unknown>) => {
+export const requireAdmin = async (ctx: Context, next: () => Promise<unknown>) => {
 
   if(!ctx.state.user.isAdmin)
   {
@@ -30,7 +30,7 @@ const requireAdmin = async (ctx: Context, next: () => Promise<unknown>) => {
 };
 
 
-const requireGod = async (ctx: Context, next: () => Promise<unknown>) => {
+export const requireGod = async (ctx: Context, next: () => Promise<unknown>) => {
 
 
   // debería haber elegido en cliente una app y traer en role en user
@@ -46,11 +46,4 @@ const requireGod = async (ctx: Context, next: () => Promise<unknown>) => {
 
   await next();
 
-};
-
-
-export default {
-  requireUser,
-  requireAdmin,
-  requireGod
 };
