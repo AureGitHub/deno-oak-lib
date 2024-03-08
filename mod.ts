@@ -4,5 +4,5 @@ export * from "./status.ts"
 export * from "./sendEmail.ts"
 
 export * from "./aureDB.ts"
-export * from "./controller.ts"
+export * from "./auth-token.ts"
 export * from "./require.ts"

@@ -1,5 +1,5 @@
 import { Application, isHttpError, logger, Status, send, oakCors } from "./deps.ts";
-import {secureTokenController} from "./controller.ts";
+import {secureTokenController} from "./auth-token.ts";
 import { Router } from "./deps.ts";
 
 export const run = (appRouter : Router) => { 
