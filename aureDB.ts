@@ -321,6 +321,14 @@ export class aureDB {
       const resutl = await this.execute_sentence(str, params?.tr);
       return resutl && resutl.rows && resutl.rows[0] && resutl.rows[0]['total'] ? resutl.rows[0]['total'] : null;
     }
+
+    else if (params['_sum']) {
+      const field = params['_sum'];      
+      const strValuesWhere = this.getWhereStr(params);
+      const str = `SELECT  Sum(${field}) from "${this.table}"  ${strValuesWhere} `;
+      const resutl = await this.execute_sentence(str, params?.tr);
+      return resutl && resutl.rows && resutl.rows[0] && resutl.rows[0]['sum'] ? resutl.rows[0]['sum'] : null;
+    }
     
   }
 
