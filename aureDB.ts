@@ -64,8 +64,10 @@ export class aureDB {
     for (const pp in object) {
       if (pp == 'id') continue;
       const exits = lstColums.some(a => a['name'] == pp);
-      if (!exits)
-        throw new Error(`El campo ${pp} no pertenece a la tabla ${this.table}`);
+      if (!exits){
+        // throw new Error(`El campo ${pp} no pertenece a la tabla ${this.table}`); Si no pertenece, paso del el mas abajo
+      }
+        
     }
   }
 
@@ -99,6 +101,11 @@ export class aureDB {
       }
   
       const typeEntity = lstColums.find(a => a['name'] == pp);
+   
+      if(!typeEntity){
+        continue;  // el campo no pertenece a la tabla, paso de él
+      }
+      
   
       switch (typeEntity.type) {
         case 'text':
