@@ -1,4 +1,4 @@
-import { Context, StatusCodes  } from "./deps.ts";
+import { Context, StatusCodes  } from "../deps.ts";
 
 export const requireUser = async (ctx: Context, next: () => Promise<unknown>) => {
 

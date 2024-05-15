@@ -5,4 +5,5 @@ export * from "./sendEmail.ts"
 
 export * from "./aureDB.ts"
 export * from "./auth-token.ts"
-export * from "./require.ts"
+export * from "./middleware/require.ts"
+export * from "./middleware/getData.ts"

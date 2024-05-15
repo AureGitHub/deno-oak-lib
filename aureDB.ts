@@ -147,6 +147,7 @@ export class aureDB {
     
       switch (typeEntity.type) {
         case 'text':          
+        case 'bytea':   
         case 'date':          
         case 'password':
           
