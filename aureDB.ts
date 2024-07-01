@@ -73,27 +73,31 @@ export class aureDB {
 
   private propertiesToColumns(object: any){
 
+    const lstColums = this.entities[this.table];
     let sal = '';  
     for (const pp in object) {
-      if (pp == 'createdAt' || pp == 'updatedAt') {
-        sal += `"${pp}",`;
+      if(lstColums.some(a=> a.name==pp)){
+        if (pp == 'createdAt' || pp == 'updatedAt') {
+          sal += `"${pp}",`;
+        }
+        else {
+          sal += pp + ",";
+        }
       }
-      else {
-        sal += pp + ",";
-      }
-  
     }
 
     sal = sal.substring(0, sal.length - 1);
     return sal;
   }
 
-  private objecToValues (object: any){
+  private objecToValues (srtColums : any,object: any){
     let sal = '';
   
+    const arrsrtColums = srtColums.split(',');
     const lstColums = this.entities[this.table];
   
-    for (const pp in object) {
+    for (let i=0; i<arrsrtColums.length; i++) {
+      const pp = arrsrtColums[i].split('"').join(''); // le quito las "" para los createAt
   
       if (pp == 'id') {
         sal += `${object[pp]},`;
@@ -110,7 +114,8 @@ export class aureDB {
       switch (typeEntity.type) {
         case 'text':
         case 'date':          
-        case 'password':
+        case 'password':          
+        case 'bytea':
           sal += `'${object[pp]}',`;
           break;
         default:
@@ -135,6 +140,10 @@ export class aureDB {
       }
   
       const typeEntity = lstColums.find(a => a['name'] == pp);
+
+      if (!typeEntity) {
+        continue;
+      }
 
 
       if (pp == 'createdAt' || pp == 'updatedAt') {
@@ -265,7 +274,15 @@ export class aureDB {
   
 
     if(mode == 'C'){
-    const result =  await client.queryObject(sqlSelectOnlyCount + sqlFrom + strPrismaFilter);   
+    const result =  await client.queryObject(
+
+      {
+        "camelCase" : false,
+        text:  sqlSelectOnlyCount + sqlFrom + strPrismaFilter,
+      }
+
+     
+    );   
     count = result &&  result.rows  &&  result.rows[0] && result.rows[0]['total'] ? parseInt(result.rows[0]['total']) : 0;
   }
 
@@ -370,12 +387,28 @@ export class aureDB {
     if(createdAt){
       data['createdAt'] = new Date().toISOString();
     }
-
-
-
      
+
+    //gestion de files
+
+    if(data['files'] && data['files'].length > 0){
+      for(let i=0; i<  data['files'].length; i++){
+        const objFile = data['files'][i];
+        const fileInsert = await this.client.queryArray(
+         'INSERT INTO public."Documentos" (filename, contenttype, "content") VALUES ($1, $2, $3)  RETURNING Id',
+         [objFile['filename'],objFile['contenttype'], objFile['content']]
+       );
+
+       data[objFile['property']]=fileInsert.rows[0][0];
+
+      }
+    }
+
     const srtColums = this.propertiesToColumns(data);
-    const strValues = this.objecToValues(data);
+    const strValues = this.objecToValues(srtColums, data);
+
+
+
     const str = `INSERT INTO "${this.table}" (${srtColums}) VALUES (${strValues}) RETURNING *`;
     const resutl = await this.execute_sentence(str, params?.tr);
     return resutl?.rows && resutl?.rows[0] ? resutl?.rows[0] : null;
@@ -398,6 +431,22 @@ export class aureDB {
     if(updatedAt){
       data['updatedAt'] = new Date().toISOString();
     }
+
+        //gestion de files
+
+        if(data['files'] && data['files'].length > 0){
+          for(let i=0; i<  data['files'].length; i++){
+            const objFile = data['files'][i];
+            const fileInsert = await this.client.queryArray(
+             'INSERT INTO public."Documentos" (filename, contenttype, "content") VALUES ($1, $2, $3)  RETURNING Id',
+             [objFile['filename'],objFile['contenttype'], objFile['content']]
+           );
+    
+           data[objFile['property']]=fileInsert.rows[0][0];
+    
+          }
+        }
+
 
     let str = `UPDATE "${this.table}" SET `;
     const strValues = this.objecToPropertieAndValues(data);

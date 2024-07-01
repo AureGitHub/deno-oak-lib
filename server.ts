@@ -1,11 +1,17 @@
 import { Application, isHttpError, logger, Status, send, oakCors } from "./deps.ts";
 import {secureTokenController} from "./auth-token.ts";
 import { Router } from "./deps.ts";
+import { loadKeyAndCert } from "https://deno.land/x/http_fns@v0.5.0/lib/load_key_and_cert.ts";
 
-export const run = (appRouter : Router) => { 
+export const run = (appRouter : Router, fullstack = false) => { 
 
-  const ROOT_DIR = "./ionic";
+  let ROOT_DIR = "./ionic";
   const ROOT_DIR_PATH = "/ionic";
+
+  if(fullstack){
+    ROOT_DIR = "./ionic/www";
+  }
+
 
   const app = new Application();
 
@@ -109,13 +115,21 @@ export const run = (appRouter : Router) => {
    */
 
 
-
-  app.addEventListener("listen", ({ port, secure }) => {
+  app.addEventListener("listen", ({ port, secure   }) => {
     console.info(
-      `🚀 Server started on ${secure ? "https://" : "http://"}localhost:${port}`
+      `🚀 Server started on ${secure   ? "https://" : "http://"}localhost:${port}`
     );
   });
 
-  app.listen({ port });
+
+  const { produccion } = Deno.env.toObject();
+
+  if(produccion == 'true'){
+    app.listen({ port});
+  }
+  else{
+    app.listen({ port , secure: true, certFile: "./certs/cert.pem", keyFile: "./certs/key.pem"});
+
+  }
 
 }
