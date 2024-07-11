@@ -2,6 +2,7 @@ import { Application, isHttpError, logger, Status, send, oakCors } from "./deps.
 import {secureTokenController} from "./auth-token.ts";
 import { Router } from "./deps.ts";
 import { loadKeyAndCert } from "https://deno.land/x/http_fns@v0.5.0/lib/load_key_and_cert.ts";
+import { getData } from "./middleware/getData.ts";
 
 export const run = (appRouter : Router, fullstack = false) => { 
 
@@ -59,6 +60,8 @@ export const run = (appRouter : Router, fullstack = false) => {
 
   // este middel comprueba que el token sea correcto y lo refresca
   app.use(secureTokenController);
+  // este middel obtiene los datos y los guarda en ctx
+  // app.use(getData);
 
 
   app.use(async (ctx, next) => {

@@ -77,7 +77,7 @@ export class aureDB {
     let sal = '';  
     for (const pp in object) {
       if(lstColums.some(a=> a.name==pp)){
-        if (pp == 'createdAt' || pp == 'updatedAt') {
+        if (pp == 'createdAt' || pp == 'updatedAt') {          
           sal += `"${pp}",`;
         }
         else {
@@ -115,7 +115,7 @@ export class aureDB {
         case 'text':
         case 'date':          
         case 'password':          
-        case 'bytea':
+        // case 'bytea':
           sal += `'${object[pp]}',`;
           break;
         default:
@@ -155,6 +155,9 @@ export class aureDB {
       
     
       switch (typeEntity.type) {
+        case 'bytea':   
+        sal += `${object[pp]},`;
+        break;
         case 'text':          
         case 'bytea':   
         case 'date':          
@@ -241,7 +244,7 @@ export class aureDB {
   if(!ctx.state.objPagFilterOrder){
     ctx.state.objPagFilterOrder = {};
   ctx.state.objPagFilterOrder.pagination = {};
-  ctx.state.objPagFilterOrder.pagination.withCache = false;
+  ctx.state.objPagFilterOrder.pagination.withCache = true;
   ctx.state.objPagFilterOrder.pagination.limit = 10;
   ctx.state.objPagFilterOrder.pagination.offset=0;
   ctx.state.objPagFilterOrder.columns = [];
@@ -369,6 +372,21 @@ export class aureDB {
 
   }
 
+  async gestionFile(data : any){
+    if(data['files'] && data['files'].length > 0){
+      for(let i=0; i<  data['files'].length; i++){
+        const objFile = data['files'][i];
+        const fileInsert = await this.client.queryArray(
+         'INSERT INTO public."Documentos" (filename, contenttype, "content") VALUES ($1, $2, $3)  RETURNING Id',
+         [objFile['filename'],objFile['contenttype'], objFile['content']]
+       );
+
+       data[objFile['property']]=fileInsert.rows[0][0];
+
+      }
+    }
+  }
+
 
   async create(params: any) {
 
@@ -389,20 +407,24 @@ export class aureDB {
     }
      
 
+  
+    await this.gestionFile(data);
+    
+
     //gestion de files
 
-    if(data['files'] && data['files'].length > 0){
-      for(let i=0; i<  data['files'].length; i++){
-        const objFile = data['files'][i];
-        const fileInsert = await this.client.queryArray(
-         'INSERT INTO public."Documentos" (filename, contenttype, "content") VALUES ($1, $2, $3)  RETURNING Id',
-         [objFile['filename'],objFile['contenttype'], objFile['content']]
-       );
+    // if(data['files'] && data['files'].length > 0){
+    //   for(let i=0; i<  data['files'].length; i++){
+    //     const objFile = data['files'][i];
+    //     const fileInsert = await this.client.queryArray(
+    //      'INSERT INTO public."Documentos" (filename, contenttype, "content") VALUES ($1, $2, $3)  RETURNING Id',
+    //      [objFile['filename'],objFile['contenttype'], objFile['content']]
+    //    );
 
-       data[objFile['property']]=fileInsert.rows[0][0];
+    //    data[objFile['property']]=fileInsert.rows[0][0];
 
-      }
-    }
+    //   }
+    // }
 
     const srtColums = this.propertiesToColumns(data);
     const strValues = this.objecToValues(srtColums, data);
@@ -420,11 +442,18 @@ export class aureDB {
 
   async update(params: any) {
 
+
+    
+
     if (!params['data']) {
       throw new Error(`La operación create requiere del objeto data (entidad ${this.table})`);
     }
 
     const data = params['data'];
+    const id=Number(params['data']['id']);
+
+    const oldValues = await this.findFirst({where: {id}});
+
     this.validate(data);
 
     const updatedAt = this.entities[this.table].find(a=> a.name=='updatedAt');
@@ -432,20 +461,40 @@ export class aureDB {
       data['updatedAt'] = new Date().toISOString();
     }
 
+
+    const lstColums = this.entities[this.table].filter(a=> a.type=='bytea');
+
+    lstColums.forEach(col => {
+
+      if(oldValues[col.name]){
+        //antes tenía adjunto un fichero
+        if(data[col.name] == '-1'){
+          //se ha borrado
+          data[col.name] = null;
+        }
+        //si se ha modificado, se encargará gestionFile de crear la FK
+
+      }
+    });
+    
+
+
+    await this.gestionFile(data);
+
         //gestion de files
 
-        if(data['files'] && data['files'].length > 0){
-          for(let i=0; i<  data['files'].length; i++){
-            const objFile = data['files'][i];
-            const fileInsert = await this.client.queryArray(
-             'INSERT INTO public."Documentos" (filename, contenttype, "content") VALUES ($1, $2, $3)  RETURNING Id',
-             [objFile['filename'],objFile['contenttype'], objFile['content']]
-           );
+        // if(data['files'] && data['files'].length > 0){
+        //   for(let i=0; i<  data['files'].length; i++){
+        //     const objFile = data['files'][i];
+        //     const fileInsert = await this.client.queryArray(
+        //      'INSERT INTO public."Documentos" (filename, contenttype, "content") VALUES ($1, $2, $3)  RETURNING Id',
+        //      [objFile['filename'],objFile['contenttype'], objFile['content']]
+        //    );
     
-           data[objFile['property']]=fileInsert.rows[0][0];
+        //    data[objFile['property']]=fileInsert.rows[0][0];
     
-          }
-        }
+        //   }
+        // }
 
 
     let str = `UPDATE "${this.table}" SET `;
@@ -455,6 +504,26 @@ export class aureDB {
     const strValuesWhere = this.getWhereStr(params);
     str += strValuesWhere;
     const resutl = await this.execute_sentence(str, params?.tr);
+
+    
+    
+    //chequeo los documentos que tengo que borrar (ya no se usan)
+    lstColums.forEach(async col => {
+
+
+
+        if(oldValues[col.name] && oldValues[col.name]!=data[col.name]){
+          //si tenía adjunto un fichero y se ha modificado o borrado
+          const fileInsert = await this.client.queryArray(
+            'DELETE FROM public."Documentos" WHERE Id=$1',
+            [oldValues[col.name]]
+          );
+        }
+
+    });
+
+
+
     return resutl;
   }
 
