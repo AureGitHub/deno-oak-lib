@@ -8,11 +8,13 @@ export class aureDB {
   private table: string;
   private entities : any;
   private client : any;
+  private clientNoTransaction: any;
   
-  constructor(client: any, entities : any, table: string) {  
+  constructor(client: any,clientNoTransaction : any, entities : any, table: string) {  
     this.table = table;
     this.entities = entities;
     this.client = client;
+    this.clientNoTransaction = clientNoTransaction;
 
     if (!this.entities) {
       throw new Error(`configuración de entidades no existe`);
@@ -450,9 +452,9 @@ export class aureDB {
     }
 
     const data = params['data'];
-    const id=Number(params['data']['id']);
+    const id=Number(params['where']['id']);
 
-    const oldValues = await this.findFirst({where: {id}});
+    const oldValues = await this.findFirst({where: {id}, tr: this.clientNoTransaction});
 
     this.validate(data);
 
