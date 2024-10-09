@@ -454,7 +454,7 @@ export class aureDB {
     const data = params['data'];
     const id=Number(params['where']['id']);
 
-    const oldValues = await this.findFirst({where: {id}, tr: this.clientNoTransaction});
+    // const oldValues = await this.findFirst({where: {id}, tr: this.clientNoTransaction});
 
     this.validate(data);
 
@@ -468,15 +468,15 @@ export class aureDB {
 
     lstColums.forEach(col => {
 
-      if(oldValues[col.name]){
-        //antes tenía adjunto un fichero
-        if(data[col.name] == '-1'){
-          //se ha borrado
-          data[col.name] = null;
-        }
-        //si se ha modificado, se encargará gestionFile de crear la FK
+      // if(oldValues[col.name]){
+      //   //antes tenía adjunto un fichero
+      //   if(data[col.name] == '-1'){
+      //     //se ha borrado
+      //     data[col.name] = null;
+      //   }
+      //   //si se ha modificado, se encargará gestionFile de crear la FK
 
-      }
+      // }
     });
     
 
@@ -514,13 +514,13 @@ export class aureDB {
 
 
 
-        if(oldValues[col.name] && oldValues[col.name]!=data[col.name]){
-          //si tenía adjunto un fichero y se ha modificado o borrado
-          const fileInsert = await this.client.queryArray(
-            'DELETE FROM public."Documentos" WHERE Id=$1',
-            [oldValues[col.name]]
-          );
-        }
+        // if(oldValues[col.name] && oldValues[col.name]!=data[col.name]){
+        //   //si tenía adjunto un fichero y se ha modificado o borrado
+        //   const fileInsert = await this.client.queryArray(
+        //     'DELETE FROM public."Documentos" WHERE Id=$1',
+        //     [oldValues[col.name]]
+        //   );
+        // }
 
     });
 
