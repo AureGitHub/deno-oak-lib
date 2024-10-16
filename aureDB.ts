@@ -4,14 +4,13 @@ import { StatusCodes } from "./deps.ts";
 
 
 
-export class aureDB { 
-  public a: any;
+export class aureDB {
   private table: string;
-  private entities : any;
-  private client : any;
+  private entities: any;
+  private client: any;
   private clientNoTransaction: any;
-  
-  constructor(client: any,clientNoTransaction : any, entities : any, table: string) {  
+
+  constructor(client: any, clientNoTransaction: any, entities: any, table: string) {
     this.table = table;
     this.entities = entities;
     this.client = client;
@@ -27,37 +26,37 @@ export class aureDB {
 
   }
 
-  private getFilter(colums : any[]){
-    let cadena =  `WHERE 1=1 `;
+  private getFilter(colums: any[]) {
+    let cadena = `WHERE 1=1 `;
     colums.forEach(col => {
-      if(col['filter']){
-        cadena+=` and ${col.prop} like '%${col['filter']}%' `;
+      if (col['filter']) {
+        cadena += ` and ${col.prop} like '%${col['filter']}%' `;
       }
 
-      if(col['filterInit']){
-        cadena+=` and ${col['filterInit']} `;
+      if (col['filterInit']) {
+        cadena += ` and ${col['filterInit']} `;
       }
 
     })
-    
-    return  cadena ;
+
+    return cadena;
   }
 
 
-  private getOrderBy(colums : any[]){
-    let cadena =  colums.some(a=>a.order || a.OrderInit)  ? 'order by ' : '';
+  private getOrderBy(colums: any[]) {
+    let cadena = colums.some(a => a.order || a.OrderInit) ? 'order by ' : '';
     colums.forEach(col => {
-      if(col['order']){
-        cadena+=` ${col.prop} ${col['order']},`;
+      if (col['order']) {
+        cadena += ` ${col.prop} ${col['order']},`;
       }
 
-      if(col['OrderInit']){
-        cadena+=` ${col.prop} ${col['OrderInit']},`;
+      if (col['OrderInit']) {
+        cadena += ` ${col.prop} ${col['OrderInit']},`;
       }
 
     })
-    return  cadena.substring(0,cadena.length-1) ;
-  } 
+    return cadena.substring(0, cadena.length - 1);
+  }
 
 
 
@@ -67,20 +66,20 @@ export class aureDB {
     for (const pp in object) {
       if (pp == 'id') continue;
       const exits = lstColums.some(a => a['name'] == pp);
-      if (!exits){
+      if (!exits) {
         // throw new Error(`El campo ${pp} no pertenece a la tabla ${this.table}`); Si no pertenece, paso del el mas abajo
       }
-        
+
     }
   }
 
-  private propertiesToColumns(object: any){
+  private propertiesToColumns(object: any) {
 
     const lstColums = this.entities[this.table];
-    let sal = '';  
+    let sal = '';
     for (const pp in object) {
-      if(lstColums.some(a=> a.name==pp)){
-        if (pp == 'createdAt' || pp == 'updatedAt') {          
+      if (lstColums.some(a => a.name == pp)) {
+        if (pp == 'createdAt' || pp == 'updatedAt') {
           sal += `"${pp}",`;
         }
         else {
@@ -93,32 +92,31 @@ export class aureDB {
     return sal;
   }
 
-  private objecToValues (srtColums : any,object: any){
+  private objecToValues(srtColums: any, object: any) {
     let sal = '';
-  
+
     const arrsrtColums = srtColums.split(',');
     const lstColums = this.entities[this.table];
-  
-    for (let i=0; i<arrsrtColums.length; i++) {
+
+    for (let i = 0; i < arrsrtColums.length; i++) {
       const pp = arrsrtColums[i].split('"').join(''); // le quito las "" para los createAt
-  
+
       if (pp == 'id') {
         sal += `${object[pp]},`;
         continue;
       }
-  
+
       const typeEntity = lstColums.find(a => a['name'] == pp);
-   
-      if(!typeEntity){
+
+      if (!typeEntity) {
         continue;  // el campo no pertenece a la tabla, paso de él
       }
-      
-  
+
+
       switch (typeEntity.type) {
         case 'text':
-        case 'date':          
-        case 'password':          
-        // case 'bytea':
+        case 'date':
+        case 'password':
           sal += `'${object[pp]}',`;
           break;
         default:
@@ -129,19 +127,19 @@ export class aureDB {
     sal = sal.substring(0, sal.length - 1);
     return sal;
   }
-  
-  private objecToPropertieAndValues(object: any){
+
+  private objecToPropertieAndValues(object: any) {
     let sal = '';
-  
+
     const lstColums = this.entities[this.table];
-  
+
     for (const pp in object) {
-  
+
       if (pp == 'id') {
         sal += `${pp}=${object[pp]},`;
         continue;
       }
-  
+
       const typeEntity = lstColums.find(a => a['name'] == pp);
 
       if (!typeEntity) {
@@ -155,17 +153,24 @@ export class aureDB {
       else {
         sal += `${pp}=`;
       }
-      
-    
+
+
       switch (typeEntity.type) {
-        case 'bytea':   
-        sal += `${object[pp]},`;
-        break;
-        case 'text':          
-        case 'bytea':   
-        case 'date':          
+
+        case 'file':
+          if (object[pp]) {
+            sal += `'${object[pp]}',`;
+          }
+          else {
+            sal += `null,`;
+          }
+          break;
+
+        case 'text':
+
+        case 'date':
         case 'password':
-          
+
           sal += `'${object[pp]}',`;
           break;
         default:
@@ -178,7 +183,7 @@ export class aureDB {
   }
 
 
-  private async execute_sentence (str: string, tr: any){
+  private async execute_sentence(str: string, tr: any) {
 
     if (tr) {
       const data = await tr.queryObject(
@@ -187,50 +192,50 @@ export class aureDB {
           text: str,
         },
       );
-  
+
       return data;
     }
     else {
-  
+
       const data = await this.client.queryObject(
         {
           camelcase: true,
           text: str,
         }
       );
-  
+
       return data;
-  
+
     }
-  
-  
+
+
   }
 
-  private getWhereStr(params : any){    
-    if(!params || !params['where']) return '';
-      this.validate(params['where']);   
-      let str = this.objecToPropertieAndValues(params['where']);
+  private getWhereStr(params: any) {
+    if (!params || !params['where']) return '';
+    this.validate(params['where']);
+    let str = this.objecToPropertieAndValues(params['where']);
 
 
-      if(params['whereLstStr']){                  
-        str+= ' , ' + params['whereLstStr'].toString();
+    if (params['whereLstStr']) {
+      str += ' , ' + params['whereLstStr'].toString();
 
-      }
-
-
-      str = str.replaceAll(',', ' and ');
-
-      
+    }
 
 
-      return  " WHERE " + str;
+    str = str.replaceAll(',', ' and ');
+
+
+
+
+    return " WHERE " + str;
   }
 
-  private getColumsSelectStr(params : any){
-    if(!params || !params['colums']) return ' * ';
+  private getColumsSelectStr(params: any) {
+    if (!params || !params['colums']) return ' * ';
     if (params['colums']) {
       this.validate(params['colums']);
-      return  this.propertiesToColumns(params['colums']);
+      return this.propertiesToColumns(params['colums']);
     }
 
     return ' * ';
@@ -238,86 +243,86 @@ export class aureDB {
 
 
 
-  async execute_query_data(ctx: any, client: any, sqlSelect : string, sqlFrom :string, orderBydefect : string){
-    let offset =0;
-  let limit=0;
-  let  count=0;
-  let withCache = true;
+  async execute_query_data(ctx: any, client: any, sqlSelect: string, sqlFrom: string, orderBydefect: string) {
+    let offset = 0;
+    let limit = 0;
+    let count = 0;
+    let withCache = true;
 
-  if(!ctx.state.objPagFilterOrder){
-    ctx.state.objPagFilterOrder = {};
-  ctx.state.objPagFilterOrder.pagination = {};
-  ctx.state.objPagFilterOrder.pagination.withCache = true;
-  ctx.state.objPagFilterOrder.pagination.limit = 10;
-  ctx.state.objPagFilterOrder.pagination.offset=0;
-  ctx.state.objPagFilterOrder.columns = [];
-  ctx.state.objPagFilterOrder.mode = 'C';   // 'C' => Consulta    'P'=>Paginación
-  offset *= limit;
-  ctx.state.objPagFilterOrder.pagination.count =0;
+    if (!ctx.state.objPagFilterOrder) {
+      ctx.state.objPagFilterOrder = {};
+      ctx.state.objPagFilterOrder.pagination = {};
+      ctx.state.objPagFilterOrder.pagination.withCache = true;
+      ctx.state.objPagFilterOrder.pagination.limit = 10;
+      ctx.state.objPagFilterOrder.pagination.offset = 0;
+      ctx.state.objPagFilterOrder.columns = [];
+      ctx.state.objPagFilterOrder.mode = 'C';   // 'C' => Consulta    'P'=>Paginación
+      offset *= limit;
+      ctx.state.objPagFilterOrder.pagination.count = 0;
 
-  }
+    }
 
-  if(ctx.state.objPagFilterOrder.pagination){
-    withCache=ctx.state.objPagFilterOrder.pagination?.withCache;
-    limit = ctx.state.objPagFilterOrder.pagination.limit;
-    offset = ctx.state.objPagFilterOrder.pagination.offset;
-    offset *= limit;
-    count = ctx.state.objPagFilterOrder.pagination.count;
-  }
-
-
-  const columns = ctx.state.objPagFilterOrder.columns;
-  const mode = ctx.state.objPagFilterOrder.mode;   // 'C' => Consulta    'P'=>Paginación
+    if (ctx.state.objPagFilterOrder.pagination) {
+      withCache = ctx.state.objPagFilterOrder.pagination?.withCache;
+      limit = ctx.state.objPagFilterOrder.pagination.limit;
+      offset = ctx.state.objPagFilterOrder.pagination.offset;
+      offset *= limit;
+      count = ctx.state.objPagFilterOrder.pagination.count;
+    }
 
 
+    const columns = ctx.state.objPagFilterOrder.columns;
+    const mode = ctx.state.objPagFilterOrder.mode;   // 'C' => Consulta    'P'=>Paginación
 
-  const sqlSelectOnlyCount =` select  to_char(count(*), '9999999')  as total `;
 
 
-  const strPrismaFilter = this.getFilter(columns);
+    const sqlSelectOnlyCount = ` select  to_char(count(*), '9999999')  as total `;
 
-  const strOrderBy = this.getOrderBy(columns);
-  
 
-    if(mode == 'C'){
-    const result =  await client.queryObject(
+    const strPrismaFilter = this.getFilter(columns);
 
+    const strOrderBy = this.getOrderBy(columns);
+
+
+    if (mode == 'C') {
+      const result = await client.queryObject(
+
+        {
+          "camelCase": false,
+          text: sqlSelectOnlyCount + sqlFrom + strPrismaFilter,
+        }
+
+
+      );
+      count = result && result.rows && result.rows[0] && result.rows[0]['total'] ? parseInt(result.rows[0]['total']) : 0;
+    }
+
+
+    const sql_limit = withCache ? `` : `  offset ${offset} limit ${limit}`;
+
+    const order = strOrderBy ? strOrderBy : orderBydefect;
+
+
+
+    const data = await client.queryObject(
       {
-        "camelCase" : false,
-        text:  sqlSelectOnlyCount + sqlFrom + strPrismaFilter,
+        camelcase: true,
+        text: sqlSelect + sqlFrom + strPrismaFilter + order + sql_limit,
       }
-
-     
-    );   
-    count = result &&  result.rows  &&  result.rows[0] && result.rows[0]['total'] ? parseInt(result.rows[0]['total']) : 0;
-  }
-
-
-  const sql_limit =withCache ? `` : `  offset ${offset} limit ${limit}`;
-
-  const  order = strOrderBy ? strOrderBy : orderBydefect;
-
-
-  
-   const data = await client.queryObject(
-    {
-      camelcase: true,
-      text: sqlSelect + sqlFrom + strPrismaFilter + order + sql_limit,
-    }    
     );
-    return {data, count};
+    return { data, count };
 
   }
 
 
-  async execute_query(ctx: any, client: any, sqlSelect : string, sqlFrom :string, orderBydefect : string){
+  async execute_query(ctx: any, client: any, sqlSelect: string, sqlFrom: string, orderBydefect: string) {
 
-    const result = await this.execute_query_data(ctx,client,sqlSelect,sqlFrom,orderBydefect);
-   ctx.response.status = 201;
-   ctx.response.body = {
-     status: StatusCodes.OK,
-     data: { data: result.data.rows, count: result.count },
-   };
+    const result = await this.execute_query_data(ctx, client, sqlSelect, sqlFrom, orderBydefect);
+    ctx.response.status = 201;
+    ctx.response.body = {
+      status: StatusCodes.OK,
+      data: { data: result.data.rows, count: result.count },
+    };
 
   }
 
@@ -338,7 +343,7 @@ export class aureDB {
 
   async aggregate(params: any) {
     if (params['_max']) {
-      const field = params['_max'];      
+      const field = params['_max'];
       const strValuesWhere = this.getWhereStr(params);
       const str = `SELECT  Max(${field}) from "${this.table}"  ${strValuesWhere} `;
       const resutl = await this.execute_sentence(str, params?.tr);
@@ -346,7 +351,7 @@ export class aureDB {
     }
 
     else if (params['_count']) {
-      const field = params['_count'];      
+      const field = params['_count'];
       const strValuesWhere = this.getWhereStr(params);
       const str = `SELECT  to_char(count(${field}), '9999999')  as total  from "${this.table}"  ${strValuesWhere} `;
       const resutl = await this.execute_sentence(str, params?.tr);
@@ -354,38 +359,36 @@ export class aureDB {
     }
 
     else if (params['_sum']) {
-      const field = params['_sum'];      
+      const field = params['_sum'];
       const strValuesWhere = this.getWhereStr(params);
       const str = `SELECT  Sum(${field}) from "${this.table}"  ${strValuesWhere} `;
       const resutl = await this.execute_sentence(str, params?.tr);
       return resutl && resutl.rows && resutl.rows[0] && resutl.rows[0]['sum'] ? resutl.rows[0]['sum'] : null;
     }
-    
+
   }
 
 
   async findMany(params: any = null) {
 
-    const  strValuesWhere = this.getWhereStr(params);
+    const strValuesWhere = this.getWhereStr(params);
     const columsStr = this.getColumsSelectStr(params);
-    
+
     const str = `SELECT  ${columsStr} from "${this.table}"   ${strValuesWhere} `;
     const resutl = await this.execute_sentence(str, params?.tr);
-    return resutl?.rows  ? resutl?.rows : null;
+    return resutl?.rows ? resutl?.rows : null;
 
   }
 
-  async gestionFile(data : any){
-    if(data['files'] && data['files'].length > 0){
-      for(let i=0; i<  data['files'].length; i++){
+  async gestionFile(data: any) {
+    if (data['files'] && data['files'].length > 0) {
+      for (let i = 0; i < data['files'].length; i++) {
         const objFile = data['files'][i];
         const fileInsert = await this.client.queryArray(
-         'INSERT INTO public."Documentos" (filename, contenttype, "content") VALUES ($1, $2, $3)  RETURNING Id',
-         [objFile['filename'],objFile['contenttype'], objFile['content']]
-       );
-
-       data[objFile['property']]=fileInsert.rows[0][0];
-
+          'INSERT INTO public."Documentos" (filename, contenttype, "content") VALUES ($1, $2, $3)  RETURNING Id',
+          [objFile['filename'], objFile['contenttype'], objFile['content']]
+        );
+        data[objFile['property']] = fileInsert.rows[0][0];
       }
     }
   }
@@ -397,42 +400,24 @@ export class aureDB {
       throw new Error(`La operación create requiere del objeto data (entidad ${this.table})`);
     }
     const data = params['data'];
-    this.validate(data);  
+    this.validate(data);
 
-    const updatedAt = this.entities[this.table].find(a=> a.name=='updatedAt');
-    const createdAt = this.entities[this.table].find(a=> a.name=='createdAt');
+    const updatedAt = this.entities[this.table].find(a => a.name == 'updatedAt');
+    const createdAt = this.entities[this.table].find(a => a.name == 'createdAt');
     //if(updatedAt && !data['updatedAt']){
-      if(updatedAt){ //siempre se crea desde el servidor
+    if (updatedAt) { //siempre se crea desde el servidor
       data['updatedAt'] = new Date().toISOString();
     }
-    if(createdAt){
+    if (createdAt) {
       data['createdAt'] = new Date().toISOString();
     }
-     
 
-  
+
+
     await this.gestionFile(data);
-    
-
-    //gestion de files
-
-    // if(data['files'] && data['files'].length > 0){
-    //   for(let i=0; i<  data['files'].length; i++){
-    //     const objFile = data['files'][i];
-    //     const fileInsert = await this.client.queryArray(
-    //      'INSERT INTO public."Documentos" (filename, contenttype, "content") VALUES ($1, $2, $3)  RETURNING Id',
-    //      [objFile['filename'],objFile['contenttype'], objFile['content']]
-    //    );
-
-    //    data[objFile['property']]=fileInsert.rows[0][0];
-
-    //   }
-    // }
 
     const srtColums = this.propertiesToColumns(data);
     const strValues = this.objecToValues(srtColums, data);
-
-
 
     const str = `INSERT INTO "${this.table}" (${srtColums}) VALUES (${strValues}) RETURNING *`;
     const resutl = await this.execute_sentence(str, params?.tr);
@@ -446,59 +431,34 @@ export class aureDB {
   async update(params: any) {
 
 
-    
-
     if (!params['data']) {
       throw new Error(`La operación create requiere del objeto data (entidad ${this.table})`);
     }
 
     const data = params['data'];
-    const id=Number(params['where']['id']);
-
-    // const oldValues = await this.findFirst({where: {id}, tr: this.clientNoTransaction});
+    const id = Number(params['where']['id']);
 
     this.validate(data);
 
-    const updatedAt = this.entities[this.table].find(a=> a.name=='updatedAt');
-    if(updatedAt){
+    const updatedAt = this.entities[this.table].find(a => a.name == 'updatedAt');
+    if (updatedAt) {
       data['updatedAt'] = new Date().toISOString();
     }
 
 
-    const lstColums = this.entities[this.table].filter(a=> a.type=='bytea');
+    const lstColumsTypeFile = this.entities[this.table].filter(a => a.type == 'file');
 
-    lstColums.forEach(col => {
-
-      // if(oldValues[col.name]){
-      //   //antes tenía adjunto un fichero
-      //   if(data[col.name] == '-1'){
-      //     //se ha borrado
-      //     data[col.name] = null;
-      //   }
-      //   //si se ha modificado, se encargará gestionFile de crear la FK
-
-      // }
+    lstColumsTypeFile.forEach(col => {
+      if (data[col.name + '_oldId']) {
+        //si se envía el _oldId, es porque se ha modificado o borrado
+        //lo pongo a null... si hay nuevo file, this.gestionFile(data) se encargará de gestionarlo
+        data[col.name] = null;
+      }
     });
-    
+
 
 
     await this.gestionFile(data);
-
-        //gestion de files
-
-        // if(data['files'] && data['files'].length > 0){
-        //   for(let i=0; i<  data['files'].length; i++){
-        //     const objFile = data['files'][i];
-        //     const fileInsert = await this.client.queryArray(
-        //      'INSERT INTO public."Documentos" (filename, contenttype, "content") VALUES ($1, $2, $3)  RETURNING Id',
-        //      [objFile['filename'],objFile['contenttype'], objFile['content']]
-        //    );
-    
-        //    data[objFile['property']]=fileInsert.rows[0][0];
-    
-        //   }
-        // }
-
 
     let str = `UPDATE "${this.table}" SET `;
     const strValues = this.objecToPropertieAndValues(data);
@@ -508,21 +468,20 @@ export class aureDB {
     str += strValuesWhere;
     const resutl = await this.execute_sentence(str, params?.tr);
 
-    
-    
+
+
     //chequeo los documentos que tengo que borrar (ya no se usan)
-    lstColums.forEach(async col => {
 
 
 
-        // if(oldValues[col.name] && oldValues[col.name]!=data[col.name]){
-        //   //si tenía adjunto un fichero y se ha modificado o borrado
-        //   const fileInsert = await this.client.queryArray(
-        //     'DELETE FROM public."Documentos" WHERE Id=$1',
-        //     [oldValues[col.name]]
-        //   );
-        // }
-
+    lstColumsTypeFile.forEach(async col => {
+      if (data[col.name + '_oldId']) { 
+        //si se envía el _oldId, es porque se ha modificado o borrado. Hay que borrar el  col.name + '_oldId'
+        const fileInsert = await this.client.queryArray(
+              'DELETE FROM public."Documentos" WHERE Id=$1',
+              [data[col.name + '_oldId']]
+            );
+      }
     });
 
 
