@@ -4,7 +4,8 @@ import { StatusCodes } from "./deps.ts";
 
 
 
-export class aureDB {
+export class aureDB { 
+  public a: any;
   private table: string;
   private entities : any;
   private client : any;
