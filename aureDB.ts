@@ -211,6 +211,20 @@ export class aureDB {
 
   }
 
+
+
+  async execute_str(str: string) {
+    const data = await this.client.queryObject(
+      {
+        camelcase: true,
+        text: str,
+      }
+    );
+    return data;
+  }
+
+
+
   private getWhereStr(params: any) {
     if (!params || !params['where']) return '';
     this.validate(params['where']);
@@ -491,10 +505,26 @@ export class aureDB {
 
 
   async del(params: any) {
+
+    const data = await this.findFirst(params);
+
     let str = `DELETE FROM "${this.table}" `;
     const strValuesWhere = this.getWhereStr(params);
     str += strValuesWhere;
     const resutl = await this.execute_sentence(str, params?.tr);
+
+    //borrar sus files (si los tuviese)
+    const lstColumsTypeFile = this.entities[this.table].filter(a => a.type == 'file');
+    lstColumsTypeFile.forEach(async col => {
+      if(data[col.name]){
+        const fileInsert = await this.client.queryArray(
+          'DELETE FROM public."Documentos" WHERE Id=$1',
+          [data[col.name]]
+        );
+      }
+      
+    });
+
     return resutl;
   }
 }
