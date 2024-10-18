@@ -1,7 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
 
-import { StatusCodes } from "./deps.ts";
+import { StatusCodes } from "../deps.ts";
 
+const lstEntityGenericNoObligatoria = [
+  'Documentos'
+];
 
 
 export class aureDB {
@@ -21,7 +24,16 @@ export class aureDB {
     }
 
     if (!this.entities[table]) {
-      throw new Error(`La entidad ${table} no existe`);
+      const errStr =`La entidad ${table} no existe`;
+
+      if(lstEntityGenericNoObligatoria.includes(table)){
+        console.log('Atención...' + errStr);
+      }
+      else{
+        throw new Error(errStr);
+      }
+
+      
     }
 
   }
