@@ -4,14 +4,14 @@ import { TC_UserEstado } from "../../enums/enums.ts"
 import { setStatus, statusError, statusOK } from "../../status.ts";
 import { StatusCodes } from "../../deps.ts";
 import { giveMeToken } from "../../auth-token.ts";
-import { aureDB } from "../../db/aureDB.ts";
+import { aureDB } from "../../aureDB.ts";
 
 let entity: any;
 
 
 
 const init=(client: any,clientNoTransaction: any, entities : any)=>{
-  entity =new aureDB(client,clientNoTransaction,entities,'User');
+  entity =new aureDB(client,clientNoTransaction,entities,'public."User"');
 }
 
 

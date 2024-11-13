@@ -3,7 +3,7 @@ export * from "./deps.ts"
 export * from "./status.ts"
 export * from "./sendEmail.ts"
 
-export * from "./db/aureDB.ts"
+export * from "./aureDB.ts"
 export * from "./db/genericDB.ts"
 export * from "./auth-token.ts"
 export * from "./middleware/require.ts"

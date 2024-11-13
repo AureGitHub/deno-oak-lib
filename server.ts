@@ -16,6 +16,7 @@ export const run = (appRouter : Router, fullstack = false) => {
 
   const app = new Application();
 
+
   app.use(oakCors({ origin: '*' }));
 
   // Middleware Logger

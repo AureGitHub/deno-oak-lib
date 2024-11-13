@@ -1,4 +1,4 @@
-import { aureDB } from "../../db/aureDB.ts";
+import { aureDB } from "../../aureDB.ts";
 import { StatusCodes } from "../../deps.ts";
 import { setStatus, statusOK } from "../../status.ts";
 
@@ -6,7 +6,7 @@ let entity: any;
 
 
 const init=(client: any,clientNoTransaction: any, entities : any)=>{
-  entity =new aureDB(client,clientNoTransaction,entities,'Documentos');
+  entity =new aureDB(client,clientNoTransaction,entities,'public."Documentos"');
 }
 
 const getById = async (ctx: any) => {

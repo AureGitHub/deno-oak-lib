@@ -1,4 +1,4 @@
-import { aureDB } from "../../db/aureDB.ts";
+import { aureDB } from "../../aureDB.ts";
 import { statusOK } from "../../status.ts";
 
 let client: any;
