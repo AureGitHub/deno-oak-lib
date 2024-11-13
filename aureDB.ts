@@ -3,7 +3,7 @@
 import { StatusCodes } from "./deps.ts";
 
 const lstEntityGenericNoObligatoria = [
-  'Documentos'
+  'public."Documentos"'
 ];
 
 
