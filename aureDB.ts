@@ -13,6 +13,7 @@ export class aureDB {
   private client: any;
   private clientNoTransaction: any;
 
+  
   constructor(client: any, clientNoTransaction: any, entities: any, table: string) {
     this.table = table;
     this.entities = entities;
@@ -354,7 +355,7 @@ export class aureDB {
 
   }
 
-  async queryObject(client: any, sqlSelect: string) {
+  static async queryObject(client: any, sqlSelect: string) {
     const result = await client.queryObject({"camelCase": false,text: sqlSelect});
     return result;
   }
