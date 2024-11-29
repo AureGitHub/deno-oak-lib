@@ -89,7 +89,14 @@ export class aureDB {
     const lstColums = this.entities[this.table];
     let sal = '';
     for (const pp in object) {
-      if (lstColums.some(a => a.name == pp)) {
+      const entityType = lstColums.find(a=> a.name == pp);
+
+      if (entityType) {        
+        if(entityType.type == 'file' && !object[pp] ){
+          continue;        
+        }
+        
+
         if (pp == 'createdAt' || pp == 'updatedAt') {
           sal += `"${pp}",`;
         }

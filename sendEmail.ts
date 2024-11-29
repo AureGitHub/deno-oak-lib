@@ -63,8 +63,7 @@ export const sendEmailBACK = async (
   subject: string,
   bodyHtml: string,
 ) => {
-  const { email_user_smtp, email_password_smtp, email_bcc } = Deno.env
-    .toObject();
+  const { email_user_smtp, email_password_smtp, email_bcc } = Deno.env.toObject();
 
   console.log("email_user_smtp " + email_user_smtp);
   console.log("email_password_smtp " + email_password_smtp);

@@ -1,8 +1,7 @@
 import { Application, isHttpError, logger, Status, send, oakCors } from "./deps.ts";
 import {secureTokenController} from "./auth-token.ts";
 import { Router } from "./deps.ts";
-import { loadKeyAndCert } from "https://deno.land/x/http_fns@v0.5.0/lib/load_key_and_cert.ts";
-import { getData } from "./middleware/getData.ts";
+
 
 export const run = (appRouter : Router, fullstack = false) => { 
 
