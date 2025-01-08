@@ -460,7 +460,14 @@ export class aureDB {
 
     await this.gestionFile(data);
 
-    const srtColums = this.propertiesToColumns(data);
+    let srtColums = this.propertiesToColumns(data);
+
+    if(this.table == 'public."User"'){
+      //esta tabla no tiene secuencia...
+      srtColums = 'id,' + srtColums;
+    }
+
+
     const strValues = this.objecToValues(srtColums, data);
 
     const str = `INSERT INTO ${this.table} (${srtColums}) VALUES (${strValues}) RETURNING *`;
